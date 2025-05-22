@@ -5,12 +5,10 @@ const app = express();
 require('dotenv').config();
 const port = process.env.PORT || 5000;
 
-
 app.use(cors({
     origin: 'http://localhost:5173',
     credentials: true,
 }));
-
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@hobbyhive.axzu7a1.mongodb.net/?retryWrites=true&w=majority&appName=HobbyHive`;
@@ -24,16 +22,14 @@ const client = new MongoClient(uri, {
 });
 
 async function run() {
-
     try {
         await client.connect();
-
         console.log("Connected to MongoDB");
 
         const database = client.db("HobbyHive");
         const hobbyCollection = database.collection("all_hobby_group");
 
-
+        // ✅ Get all groups
         app.get('/hobby-groups', async (req, res) => {
             try {
                 const result = await hobbyCollection.find().toArray();
@@ -42,10 +38,9 @@ async function run() {
                 console.error(error);
                 res.status(500).send({ message: "Failed to fetch hobby groups" });
             }
-
         });
 
-
+        // ✅ Create a new group
         app.post('/create-group', async (req, res) => {
             try {
                 const group = req.body;
@@ -56,6 +51,8 @@ async function run() {
                 res.status(500).send({ message: "Failed to create hobby group" });
             }
         });
+
+        // ✅ Get groups by user email
         app.get('/my-groups', async (req, res) => {
             const userEmail = req.query.email;
             console.log("Email received:", userEmail); 
@@ -73,28 +70,26 @@ async function run() {
             }
         });
 
-      app.get('/hobby-groups/:id', async (req, res) => {
-    const id = req.params.id;
+        // ✅ Get a single group by ID
+        app.get('/hobby-groups/:id', async (req, res) => {
+            const id = req.params.id;
+            try {
+                const group = await hobbyCollection.findOne({ _id: new ObjectId(id) });
 
-    try {
-        const group = await hobbyCollection.findOne({ _id: new ObjectId(id) });
+                if (!group) {
+                    return res.status(404).json({ message: "Group not found" });
+                }
 
-        if (!group) {
-            return res.status(404).json({ message: "Group not found" });
-        }
+                res.status(200).json(group);
+            } catch (error) {
+                console.error("Error fetching group:", error);
+                res.status(500).json({ message: "Failed to fetch group" });
+            }
+        });
 
-        res.status(200).json(group);
-    } catch (error) {
-        console.error("Error fetching group:", error);
-        res.status(500).json({ message: "Failed to fetch group" });
-    }
-});
-
-
-
+        // ✅ DELETE a group by ID
         app.delete('/groups/:id', async (req, res) => {
             const id = req.params.id;
-
             try {
                 const result = await hobbyCollection.deleteOne({ _id: new ObjectId(id) });
 
@@ -109,7 +104,27 @@ async function run() {
             }
         });
 
+        // ✅✅✅ [NEW] PUT route to UPDATE a group by ID
+        app.put('/groups/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedData = req.body;
 
+            try {
+                const result = await hobbyCollection.updateOne(
+                    { _id: new ObjectId(id) },
+                    { $set: updatedData }
+                );
+
+                if (result.matchedCount === 0) {
+                    return res.status(404).json({ message: "Group not found" });
+                }
+
+                res.status(200).json({ message: "Group updated successfully" });
+            } catch (error) {
+                console.error('Update error:', error);
+                res.status(500).json({ message: 'Failed to update group' });
+            }
+        });
 
     } catch (err) {
         console.error("MongoDB connection error:", err);
