@@ -13,6 +13,7 @@ app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@hobbyhive.axzu7a1.mongodb.net/?retryWrites=true&w=majority&appName=HobbyHive`;
 
+
 const client = new MongoClient(uri, {
     serverApi: {
         version: ServerApiVersion.v1,
