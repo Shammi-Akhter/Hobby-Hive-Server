@@ -21,13 +21,13 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
-        // await client.connect();
+     
         console.log("Connected to MongoDB");
 
         const database = client.db("HobbyHive");
         const hobbyCollection = database.collection("all_hobby_group");
 
-        // ✅ Get all groups
+       
         app.get('/hobby-groups', async (req, res) => {
             try {
                 const result = await hobbyCollection.find().toArray();
@@ -38,7 +38,7 @@ async function run() {
             }
         });
 
-        // ✅ Create a new group
+
         app.post('/create-group', async (req, res) => {
             try {
                 const group = req.body;
@@ -50,7 +50,7 @@ async function run() {
             }
         });
 
-        // ✅ Get groups by user email
+        
         app.get('/my-groups', async (req, res) => {
             const userEmail = req.query.email;
             console.log("Email received:", userEmail); 
@@ -68,7 +68,7 @@ async function run() {
             }
         });
 
-        // ✅ Get a single group by ID
+        
         app.get('/hobby-groups/:id', async (req, res) => {
             const id = req.params.id;
             try {
@@ -85,7 +85,6 @@ async function run() {
             }
         });
 
-        // ✅ DELETE a group by ID
         app.delete('/groups/:id', async (req, res) => {
             const id = req.params.id;
             try {
@@ -102,7 +101,7 @@ async function run() {
             }
         });
 
-        // ✅✅✅ [NEW] PUT route to UPDATE a group by ID
+        
         app.put('/groups/:id', async (req, res) => {
             const id = req.params.id;
             const updatedData = req.body;
